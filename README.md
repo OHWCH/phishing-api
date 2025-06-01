@@ -61,7 +61,7 @@ Call<ResponseBody> analyzeAudio(@Part MultipartBody.Part audio);
 ### 3. Retrofit 설정
 ```java
 Retrofit retrofit = new Retrofit.Builder()
-    .baseUrl("https://your-api.onrender.com/") // 실제 배포 URL
+    .baseUrl("https://phishing-api-yp4n.onrender.com")
     .addConverterFactory(GsonConverterFactory.create())
     .build();
 
