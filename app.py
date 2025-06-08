@@ -4,9 +4,12 @@ import pickle
 import numpy as np
 import requests
 import uuid
+from pydub import AudioSegment
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import speech_recognition as sr
+
+AudioSegment.converter = "./bin/ffmpeg"
 
 # ---------------------- 설정 ----------------------
 MODEL_PATH = "phishing_model.h5"
@@ -117,22 +120,30 @@ def analyze_audio():
     if "audio" not in request.files:
         return jsonify({"error": "audio 파일이 필요합니다."}), 400
 
-    # 1. 고유 임시 파일명 생성
-    temp_filename = f"{uuid.uuid4().hex}.wav"
+    # 🔧 1. 임시 파일 경로 설정
+    temp_id = uuid.uuid4().hex
+    temp_3gp_path = f"{temp_id}.3gp"
+    temp_wav_path = f"{temp_id}.wav"
+
+    # 🔧 2. 3gp 파일 저장
     audio = request.files["audio"]
-    audio.save(temp_filename)
+    audio.save(temp_3gp_path)
 
     try:
-        # 2. STT 처리
-        text = stt.transcribe(temp_filename)
+        # 🔧 3. 3gp → wav 변환
+        audio_segment = AudioSegment.from_file(temp_3gp_path, format="3gp")
+        audio_segment.export(temp_wav_path, format="wav")
+        
+        # 4. STT 처리
+        text = stt.transcribe(temp_wav_path)
         if text is None:
             return jsonify({"error": "음성을 인식하지 못했습니다."}), 400
 
-        # 3. 모델 예측
+        # 5. 모델 예측
         score = analyzer.predict(text)
         result = "보이스피싱 의심됨" if score > THRESHOLD else "정상 대화"
 
-        # 4. LLM 분석
+        # 6. LLM 분석
         llm_result = None
         if score > THRESHOLD:
             llm_result = llm.analyze(text)
@@ -152,9 +163,10 @@ def analyze_audio():
         return jsonify({"error": str(e)}), 500
 
     finally:
-        # 5. 파일 삭제
-        if os.path.exists(temp_filename):
-            os.remove(temp_filename)
+        # 🔧 7. 임시 파일 삭제
+        for f in [temp_3gp_path, temp_wav_path]:
+            if os.path.exists(f):
+                os.remove(f)
 
 # ---------------------- 서버 실행 ----------------------
 if __name__ == "__main__":
