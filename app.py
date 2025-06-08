@@ -12,7 +12,7 @@ import speech_recognition as sr
 MODEL_PATH = "phishing_model.h5"
 TOKENIZER_PATH = "tokenizer.pkl"
 UPLOAD_PATH = "temp.wav"
-MAX_LEN = 100
+MAX_LEN = 300
 THRESHOLD = 0.5
 LLM_API_KEY = os.environ.get("LLM_API_KEY")
 
