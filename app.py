@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import os
+import stat
 import pickle
 import numpy as np
 import requests
@@ -9,6 +10,14 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import speech_recognition as sr
 
+# ✅ [1] ffmpeg 실행 권한 자동 부여
+ffmpeg_path = "bin/ffmpeg"
+if os.path.exists(ffmpeg_path):
+    st = os.stat(ffmpeg_path)
+    if not bool(st.st_mode & stat.S_IXUSR):  # 사용자 실행권한 없으면
+        os.chmod(ffmpeg_path, st.st_mode | stat.S_IXUSR)
+
+# ✅ [2] ffmpeg 경로 설정
 AudioSegment.converter = "./bin/ffmpeg"
 
 # ---------------------- 설정 ----------------------
