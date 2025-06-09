@@ -156,6 +156,37 @@ def analyze_audio():
         if os.path.exists(temp_filename):
             os.remove(temp_filename)
 
+
+# ---------------------- 텍스트 처리 ----------------------
+@app.route("/analyze_text", methods=["POST"])
+def analyze_text():
+    data = request.get_json()
+    text = data.get("text")
+    if not text:
+        return jsonify({"error": "text 필드가 없습니다."}), 400
+
+    try:
+        score = analyzer.predict(text)
+        result = "보이스피싱 의심됨" if score > THRESHOLD else "정상 대화"
+
+        llm_result = None
+        if score > THRESHOLD:
+            llm_result = llm.analyze(text)
+            if llm_result not in ["보이스피싱입니다", "정상 대화입니다"]:
+                llm_result = "LLM 분석 오류 또는 판단 불가"
+        else:
+            llm_result = "LLM 분석 생략됨"
+
+        return jsonify({
+            "recognized_text": text,
+            "risk_score": score,
+            "model_result": result,
+            "llm_result": llm_result
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 # ---------------------- 서버 실행 ----------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
