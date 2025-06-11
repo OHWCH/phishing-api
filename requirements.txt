@@ -1,7 +1,5 @@
 Flask
-sentence-transformers
-scikit-learn
+tensorflow
 speechrecognition
 pydub
 numpy
-requests
