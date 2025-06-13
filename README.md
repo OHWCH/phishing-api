@@ -1,3 +1,7 @@
+# 프로젝트 파일 링크
+https://drive.google.com/file/d/1_9fTYMH-Fi74trpKvvIMb9gRou_Ds038/view?usp=sharing
+
+
 # 📞 PhishingBlock - 보이스피싱 탐지 AI API
 
 Flask 기반 보이스피싱 탐지 서버입니다.  
